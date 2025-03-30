@@ -1,5 +1,19 @@
 $defaultWorkspacePath = "C:\Workspace";
 
+function Get-RAMUsed {
+	param(
+		[Parameter(Mandatory=$true)][Alias("p")][string]$processName
+	)
+
+	$processes = Get-Process | Where-Object {$_.ProcessName -like "$processName"} | Select-Object ProcessName, Id, @{Name="RAM_MB"; Expression={[math]::Round($_.WS / 1MB, 2)}}
+	$ramTotal = ($processes | Measure-Object RAM_MB -Sum).Sum
+	$processesCount = $processes.Count
+
+	$processes | Format-Table -AutoSize
+	Write-Host "Open Processes: $processesCount"
+	Write-Host "RAM Total: $ramTotal"
+}
+
 function Select-Beep {
 	param([string]$type = "Process")
 
@@ -129,3 +143,4 @@ function Get-ConfigProp {
 
 New-Alias -Name gtd -Value Select-DirectoryWithWords
 New-Alias -Name fof -Value Open-FileByWord
+New-Alias -Name ram -Value Get-RAMUsed
