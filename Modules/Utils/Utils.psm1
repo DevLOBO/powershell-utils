@@ -73,7 +73,7 @@ Select-DirectoryWithWords -words "api", "test"
 Alias: gtd
 #>
     param (
-        [string[]]$words
+        [Alias("d")][string[]]$words
     )
 
     cls
@@ -139,7 +139,7 @@ Alias: fof
 #>
     param (
         [string]$searchTerm,
-        [string]$directory="src"
+        [Alias("d")][string]$directory="src"
     )
 
     $path = Join-Path -Path "." -ChildPath $directory
@@ -154,7 +154,7 @@ Alias: fof
     }
     else {
         Select-Beep
-        $files | ForEach-Object { Write-Host "$([Array]::IndexOf($files, $_)): $_.Name" }
+        $files | ForEach-Object { Write-Host "$([Array]::IndexOf($files, $_)): $_" }
 
         $index = Read-Host "Select the index of the file: "
 

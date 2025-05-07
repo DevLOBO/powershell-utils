@@ -1,6 +1,6 @@
 @{
     # Módulo raíz
-    RootModule = 'InvokeCustomWebRequests.psm1'
+    RootModule = 'WebRequests.psm1'
 
     # Versión del módulo
     ModuleVersion = '1.0.0'
