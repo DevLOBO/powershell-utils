@@ -1,4 +1,14 @@
 function Watch-SpringBootActuatorMetrics {
+    <#
+    .SYNOPSIS
+        Monitorea el uso de CPU y memoria de una aplicación Spring Boot mediante el endpoint Actuator.
+    .PARAMETER actuatorUrl
+        URL base del endpoint Actuator (por defecto: http://localhost:8080/actuator/metrics).
+    .PARAMETER timeSleep
+        Tiempo de espera entre cada muestreo, en segundos (por defecto: 4).
+    .NOTES
+        Muestra el uso de recursos en la consola en tiempo real.
+    #>
     param(
         [string]$actuatorUrl="http://localhost:8080/actuator/metrics",
         [int]$timeSleep=4
@@ -23,27 +33,48 @@ function Watch-SpringBootActuatorMetrics {
 }
 
 function New-NativeImage {
+    <#
+    .SYNOPSIS
+        Construye una imagen nativa de una aplicación Spring Boot usando el perfil 'native'.
+    .NOTES
+        Ejecuta el comando Maven para generar la imagen.
+    #>
 	cls
 	mvn spring-boot:build-image -DskipTests -Pnative
 }
 
-function Use-SpringDev {
+function Start-SpringDev {
+    <#
+    .SYNOPSIS
+        Inicia una aplicación Spring Boot en modo desarrollo sin ejecutar tests.
+    .NOTES
+        Utiliza Maven con la opción -DskipTests.
+    #>
 	cls
 	mvn spring-boot:run -DskipTests
 }
 
-function Use-SpringDevDebug {
+function Start-SpringDevDebug {
+    <#
+    .SYNOPSIS
+        Inicia una aplicación Spring Boot en modo debug.
+    .NOTES
+        Usa la opción -Ddebug de Maven.
+    #>
 	cls
 	mvn spring-boot:run -Ddebug
 }
 
 function Analyze-SurefireReports {
+    <#
+    .SYNOPSIS
+        Ejecuta los tests y analiza los reportes Surefire de Maven para mostrar resultados detallados.
+    .NOTES
+        Muestra por consola los tests exitosos y fallidos, junto con sus mensajes y tipo de error.
+    #>
     mvn test > $null
 
-    # Define la ruta a la carpeta de reportes de Surefire
     $reportPath = "target/surefire-reports"
-
-    # Busca todos los archivos XML en la carpeta de reportes
     $reportFiles = Get-ChildItem -Path $reportPath -Filter "*.xml"
 
     if ($reportFiles.Count -eq 0) {
@@ -55,10 +86,8 @@ function Analyze-SurefireReports {
     foreach ($reportFile in $reportFiles) {
         Write-Host "`n--- Reporte: $($reportFile.Name) ---"
 
-        # Lee el contenido del archivo XML
         [xml]$xmlReport = Get-Content -Path $reportFile.FullName
 
-        # Itera sobre cada etiqueta <testcase>
         foreach ($testcase in $xmlReport.testsuite.testcase) {
             $testName = $testcase.name
             $executionTime = $testcase.time
@@ -83,8 +112,8 @@ function Analyze-SurefireReports {
     }
 }
 
-New-Alias -Name srun -Value Use-SpringDev
-New-Alias -Name srundebug -Value Use-SpringDevDebug
-New-Alias -Name bimgnat -Value New-NativeImage
-New-Alias -Name spmm -Value Monitor-SpringBootActuatorMetrics
-New-Alias -Name spt -Value Analyze-SurefireReports
+New-Alias -Name spmon -Value Watch-SpringBootActuatorMetrics
+New-Alias -Name natimg -Value New-NativeImage
+New-Alias -Name spdev -Value Start-SpringDev
+New-Alias -Name spdbg -Value Start-SpringDevDebug
+New-Alias -Name sfrep -Value Analyze-SurefireReports
