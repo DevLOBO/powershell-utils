@@ -1,4 +1,11 @@
 function Get-CurrentGitBranch {
+    <#
+    .SYNOPSIS
+        Obtiene la rama actual del repositorio Git y la copia al portapapeles.
+    .NOTES
+        Utiliza 'git branch --show-current' para identificar la rama actual.
+        Requiere que Git esté instalado y disponible en la terminal.
+    #>
 	$branch = git branch --show-current 2>$null
 	Set-Clipboard $branch
 	Select-Beep Success
@@ -6,6 +13,15 @@ function Get-CurrentGitBranch {
 }
 
 function Get-FilteredGitBranches {
+    <#
+    .SYNOPSIS
+        Filtra y muestra ramas Git que contengan todas las palabras clave especificadas.
+    .PARAMETER keywords
+        Lista de palabras clave que deben estar presentes en el nombre de la rama.
+    .NOTES
+        Ignora prefijos como 'remotes/origin/' y puede usarse con múltiples palabras clave.
+        Útil para buscar ramas específicas de forma rápida.
+    #>
 	param(
 		[Parameter(Mandatory=$true)][string[]]$keywords
 	)
@@ -30,13 +46,20 @@ function Get-FilteredGitBranches {
 		}
 
 		$filteredBranches | % { Write-Host $_ }
-		select-Beep Success
+		Select-Beep Success
 	} catch {
 		Select-Beep Fail
 	}
 }
 
 function Copy-RemoteGitRepository {
+    <#
+    .SYNOPSIS
+        Copia la URL del repositorio Git remoto 'origin' al portapapeles.
+    .NOTES
+        Utiliza 'git remote get-url origin' para obtener la URL.
+        Requiere que el repositorio tenga configurado un remoto llamado 'origin'.
+    #>
 	$repositoryUrl = git remote get-url origin 2>$null
 
 	if (-not $repositoryUrl) {
@@ -48,6 +71,7 @@ function Copy-RemoteGitRepository {
 	Select-Beep Success
 }
 
-Set-Alias -Name gcgb -Value Get-CurrentGitBranch
-Set-Alias -Name gfgb -Value Get-FilteredGitBranches
-Set-Alias -Name crgr -Value Copy-RemoteGitRepository
+# Alias sugeridos
+New-Alias -Name gcgb     -Value Get-CurrentGitBranch     # Get Current Git Branch
+New-Alias -Name gfgb     -Value Get-FilteredGitBranches  # Get Filtered Git Branches
+New-Alias -Name crgr     -Value Copy-RemoteGitRepository # Copy Remote Git Repository
