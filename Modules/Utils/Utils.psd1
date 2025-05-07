@@ -21,13 +21,15 @@
         'Select-Beep',
         'Select-DirectoryWithWords',
         'Open-FileByWord',
-        'Get-ConfigProp'
+        'Get-ConfigProp',
+        'Get-ExportedFunctionsAndAliasesFromModule'
     )
 
     AliasesToExport = @(
         'ram',
         'gtd',
-        'fof'
+        'fof',
+        'modexports'
     )
 
     # No se exportan cmdlets ni variables

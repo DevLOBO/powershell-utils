@@ -207,6 +207,16 @@ Get-ConfigProp -prop "Token"
 	return $configProps[$prop]
 }
 
+function Get-ExportedFunctionsAndAliasesFromModule {
+	param(
+		[Alias("m")][Paramter(Mandatory=$true)][string]$moduleName
+	)
+
+	(Get-Module $moduleName).ExportedFunctions.Keys
+	(Get-Module $moduleName).ExportedAliases.Keys
+}
+
 New-Alias -Name gtd -Value Select-DirectoryWithWords
 New-Alias -Name fof -Value Open-FileByWord
 New-Alias -Name ram -Value Get-RAMUsed
+New-Alias -Name modexports -Value Get-ExportedFunctionsAndAliasesFromModule
