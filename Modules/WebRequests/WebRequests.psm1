@@ -1,4 +1,34 @@
-function req {
+function Invoke-CustomWebRequest {
+    <#
+    .SYNOPSIS
+        Realiza una solicitud HTTP con soporte para múltiples métodos, encabezados personalizados y cuerpo desde archivo.
+
+    .DESCRIPTION
+        Esta función permite enviar solicitudes HTTP (GET, POST, PUT, DELETE, etc.) a una URL específica. 
+        Soporta encabezados personalizados, lectura de datos desde un archivo (incluido YAML convertido a JSON), 
+        y muestra la respuesta formateada con jq si está disponible. Además, guarda la respuesta en un archivo local `res.json`.
+
+    .PARAMETER uri
+        URL de destino para la solicitud HTTP.
+
+    .PARAMETER method
+        Método HTTP a utilizar (por ejemplo: GET, POST, PUT, DELETE). Por defecto es GET.
+
+    .PARAMETER data
+        Cuerpo del mensaje en formato JSON como string. Este valor se ignora si se usa el parámetro -file.
+
+    .PARAMETER headers
+        Lista de encabezados HTTP personalizados en formato "Clave: Valor".
+
+    .PARAMETER file
+        Ruta de un archivo que contiene los datos del cuerpo de la solicitud. Si es YAML, se convierte automáticamente a JSON.
+
+    .NOTES
+        - La salida se muestra formateada con jq si está instalado, de lo contrario, se imprime como texto plano.
+        - Los encabezados por defecto incluyen Content-Type y Accept-Language.
+        - La respuesta se guarda localmente como 'res.json'.
+        - Alias disponibles: X (method), d (data), H (headers), f (file).
+    #>
     param(
         [Parameter(Mandatory = $true)][string]$uri,
         [Alias("X")][string]$method = "GET",
@@ -83,3 +113,5 @@ function req {
 
     $content | Out-File -Encoding UTF8 "./res.json"
 }
+
+New-Alias -Name req -Value Invoke-CustomWebRequest
