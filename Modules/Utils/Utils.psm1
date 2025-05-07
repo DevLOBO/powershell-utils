@@ -1,6 +1,22 @@
 $defaultWorkspacePath = "C:\Workspace";
 
 function Get-RAMUsed {
+<#
+.SYNOPSIS
+Muestra los procesos cuyo nombre coincide con el parámetro dado y calcula la RAM usada en MB.
+
+.PARAMETER processName
+Nombre del proceso a buscar. Puede ser parcial.
+
+.DESCRIPTION
+Filtra los procesos que coinciden con el nombre proporcionado, muestra su uso de RAM en MB y cuenta total de procesos.
+
+.EXAMPLE
+Get-RAMUsed -processName "chrome"
+
+.NOTES
+Alias: ram
+#>
 	param(
 		[Parameter(Mandatory=$true)][Alias("p")][string]$processName
 	)
@@ -15,6 +31,19 @@ function Get-RAMUsed {
 }
 
 function Select-Beep {
+<#
+.SYNOPSIS
+Ejecuta un sonido de beep dependiendo del tipo especificado.
+
+.PARAMETER type
+Tipo de beep. Puede ser "Process", "Fail" o "Success". Por defecto es "Process".
+
+.DESCRIPTION
+Produce un beep con frecuencia y duración distintas según el tipo para indicar estado de procesos, errores o éxito.
+
+.EXAMPLE
+Select-Beep -type "Fail"
+#>
 	param([string]$type = "Process")
 
 	$beeps = @{
@@ -27,27 +56,39 @@ function Select-Beep {
 }
 
 function Select-DirectoryWithWords {
+<#
+.SYNOPSIS
+Busca y navega a un directorio cuyo nombre contenga ciertas palabras clave.
+
+.PARAMETER words
+Arreglo de palabras que deben estar presentes en el nombre del directorio.
+
+.DESCRIPTION
+Recorre los subdirectorios en la ruta de trabajo predeterminada, y si encuentra coincidencias con todas las palabras, permite al usuario seleccionar uno y navega hacia él.
+
+.EXAMPLE
+Select-DirectoryWithWords -words "api", "test"
+
+.NOTES
+Alias: gtd
+#>
     param (
         [string[]]$words
     )
 
     cls
 
-    # Verifica si la ruta base existe
     if (-Not (Test-Path -Path $defaultWorkspacePath)) {
         Select-Beep Fail
         return
     }
 
-    # Obtiene todos los directorios dentro de la ruta base
     $directories = Get-ChildItem -Path $defaultWorkspacePath -Directory
 
     $matchingDirectories = New-Object System.Collections.Generic.List[System.IO.DirectoryInfo]
     foreach ($directory in $directories) {
-        # Convierte el nombre del directorio en minúsculas para comparar sin distinción de mayúsculas
         $dirName = $directory.Name.ToLower()
 
-        # Verifica si todas las palabras están contenidas en el nombre del directorio
         $isMatch = $true
         foreach ($word in $words) {
             if (-Not $dirName.Contains($word.ToLower())) {
@@ -56,7 +97,6 @@ function Select-DirectoryWithWords {
             }
         }
 
-        # Si encuentra un directorio que coincide con todas las palabras, cambia a ese directorio
         if ($isMatch) {
             $matchingDirectories.Add($directory)
         }
@@ -78,33 +118,46 @@ function Select-DirectoryWithWords {
 }
 
 function Open-FileByWord {
+<#
+.SYNOPSIS
+Busca archivos por palabra clave y permite abrir uno con Notepad.
+
+.PARAMETER searchTerm
+Término que debe estar presente en el nombre del archivo.
+
+.PARAMETER directory
+Directorio base de búsqueda. Por defecto es "src".
+
+.DESCRIPTION
+Busca archivos recursivamente en un directorio, permite seleccionar uno si hay múltiples coincidencias y lo abre con Notepad.
+
+.EXAMPLE
+Open-FileByWord -searchTerm "config" -directory "src"
+
+.NOTES
+Alias: fof
+#>
     param (
         [string]$searchTerm,
         [string]$directory="src"
     )
 
-    # Buscar los archivos que contienen el término de búsqueda
     $path = Join-Path -Path "." -ChildPath $directory
     $files = Get-ChildItem -Path $path -Recurse -File | Where-Object { $_.Name -like "*$searchTerm*" }
 
-    # Verificar si hay archivos que coinciden
     if ($files.Count -eq 0) {
         Select-Beep Fail
     }
     elseif ($files.Count -eq 1) {
-        # Si hay solo un archivo, abrirlo en el Notepad
         Select-Beep Success
         Start-Process notepad.exe $files.FullName
     }
     else {
-        # Si hay varios archivos, imprimir la lista y pedir al usuario que elija uno
         Select-Beep
         $files | ForEach-Object { Write-Host "$([Array]::IndexOf($files, $_)): $_.Name" }
 
-        # Solicitar al usuario que ingrese el índice
         $index = Read-Host "Select the index of the file: "
 
-        # Verificar que el índice es válido
         if ($index -ge 0 -and $index -lt $files.Count) {
             $selectedFile = $files[$index]
             Select-Beep Success
@@ -117,6 +170,19 @@ function Open-FileByWord {
 }
 
 function Get-ConfigProp {
+<#
+.SYNOPSIS
+Obtiene el valor de una propiedad desde un archivo de configuración JSON del usuario.
+
+.PARAMETER prop
+Nombre de la propiedad a recuperar.
+
+.DESCRIPTION
+Busca el archivo config.json en la ruta del perfil del usuario y devuelve el valor de la propiedad especificada si existe.
+
+.EXAMPLE
+Get-ConfigProp -prop "Token"
+#>
 	param(
 		[Parameter(Mandatory = $true)][string]$prop
 	)
