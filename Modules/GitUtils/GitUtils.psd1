@@ -19,13 +19,15 @@
     FunctionsToExport = @(
         'Get-CurrentGitBranch',
         'Get-FilteredGitBranches',
-        'Copy-RemoteGitRepository'
+        'Copy-RemoteGitRepository',
+        'New-CommitAndPush'
     )
 
     AliasesToExport = @(
         'gcgb',
         'gfgb',
-        'crgr'
+        'crgr',
+        'ngcp'
     )
 
     CmdletsToExport   = @()

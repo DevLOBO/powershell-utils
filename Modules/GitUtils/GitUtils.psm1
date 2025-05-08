@@ -1,3 +1,26 @@
+function New-CommitAndPush {
+    <#
+    .SYNOPSIS
+        Aplica git add, git commit y git push consecutivamente para guardar los cambios en el repositorio remoto
+    .PARAMETER message
+        El mensaje obligatorio para crear el commit en la rama
+    .PARAMETER files
+        Los archivos que se agregan al commit, si no se define ninguno por defecto es "."
+    .NOTES
+        Guarda todos los cambios, aplica el commit y envía los cambios al repositorio remoto
+        Requiere que Git esté instalado y disponible en la terminal.
+    #>
+    param(
+        [Parameter(Mandatory=$true)][string]$message,
+        [Alias("a")][string[]]$files = @()
+    )
+
+    $addFiles = if ($files.Count -gt 0) { $files -join " " } else { "." }
+    git add $addFiles
+    git commit -m $message
+	git push
+}
+
 function Get-CurrentGitBranch {
     <#
     .SYNOPSIS
@@ -75,3 +98,4 @@ function Copy-RemoteGitRepository {
 New-Alias -Name gcgb     -Value Get-CurrentGitBranch     # Get Current Git Branch
 New-Alias -Name gfgb     -Value Get-FilteredGitBranches  # Get Filtered Git Branches
 New-Alias -Name crgr     -Value Copy-RemoteGitRepository # Copy Remote Git Repository
+New-Alias -Name ngcp -Value New-CommitAndPush
