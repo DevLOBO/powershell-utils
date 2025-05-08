@@ -209,10 +209,13 @@ Get-ConfigProp -prop "Token"
 
 function Get-ExportedFunctionsAndAliasesFromModule {
 	param(
-		[Alias("m")][Paramter(Mandatory=$true)][string]$moduleName
+		[Parameter(Mandatory=$true)][string]$moduleName
 	)
 
+	Write-Host "Functions:"
 	(Get-Module $moduleName).ExportedFunctions.Keys
+	Write-Host "---"
+	Write-Host "Aliases:"
 	(Get-Module $moduleName).ExportedAliases.Keys
 }
 
