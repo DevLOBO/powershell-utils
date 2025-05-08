@@ -74,11 +74,12 @@ function Invoke-CustomWebRequest {
     try {
         # Realizar la petición HTTP
         $response = if ($method -in "GET", "DELETE") {
-            Invoke-WebRequest -Uri $uri -Method $method -Headers $headersDict -ErrorAction Stop
+            Invoke-WebRequest -Uri $uri -Method $method -Headers $headersDict -UseBasicParsing -ErrorAction Stop
         } else {
-            Invoke-WebRequest -Uri $uri -Method $method -Headers $headersDict -Body $data -ErrorAction Stop
+            Invoke-WebRequest -Uri $uri -Method $method -Headers $headersDict -Body $data -UseBasicParsing -ErrorAction Stop
         }
-        $content = $response.Content
+        $utf8 = [System.Text.Encoding]::UTF8
+        $content = $utf8.GetString($response.RawContentStream.ToArray())
 
         Write-Host "Status Code: $($response.StatusCode)" -ForegroundColor Green
         
