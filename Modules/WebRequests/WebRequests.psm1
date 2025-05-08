@@ -79,7 +79,7 @@ function Invoke-CustomWebRequest {
             Invoke-WebRequest -Uri $uri -Method $method -Headers $headersDict -Body $data -UseBasicParsing -ErrorAction Stop
         }
         $utf8 = [System.Text.Encoding]::UTF8
-        $content = $utf8.GetString($response.RawContentStream.ToArray())
+        $content = $utf8.GetString($response.RawContentStream.ToArray()).Trim()
 
         Write-Host "Status Code: $($response.StatusCode)" -ForegroundColor Green
         
