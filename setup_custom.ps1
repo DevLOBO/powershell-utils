@@ -33,8 +33,6 @@ if (Test-Path $sourcePath) {
             $importLine | Add-Content -Path $PROFILE
         }
     }
-    
-    Write-Host "Se añadieron las líneas de Import-Module en $PROFILE si no existían previamente"
 } else {
     Write-Host "La ruta de origen no existe: $sourcePath"
 }
