@@ -21,7 +21,7 @@
         'New-NativeImage',
         'Start-SpringDev',
         'Start-SpringDevDebug',
-        'Analyze-SurefireReports'
+        'Measure-SurefireReports'
     )
 
     AliasesToExport = @(

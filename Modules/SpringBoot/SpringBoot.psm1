@@ -65,7 +65,7 @@ function Start-SpringDevDebug {
 	mvn spring-boot:run -Ddebug
 }
 
-function Analyze-SurefireReports {
+function Measure-SurefireReports {
     <#
     .SYNOPSIS
         Ejecuta los tests y analiza los reportes Surefire de Maven para mostrar resultados detallados.
@@ -116,4 +116,4 @@ New-Alias -Name spmon -Value Watch-SpringBootActuatorMetrics
 New-Alias -Name natimg -Value New-NativeImage
 New-Alias -Name spdev -Value Start-SpringDev
 New-Alias -Name spdbg -Value Start-SpringDevDebug
-New-Alias -Name sfrep -Value Analyze-SurefireReports
+New-Alias -Name sfrep -Value Measure-SurefireReports
