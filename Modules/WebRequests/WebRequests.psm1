@@ -23,6 +23,9 @@ function Invoke-CustomWebRequest {
     .PARAMETER file
         Ruta de un archivo que contiene los datos del cuerpo de la solicitud. Si es YAML, se convierte automáticamente a JSON.
 
+    .PARAMETER silent
+        Desactiva la salida en consola
+
     .NOTES
         - La salida se muestra formateada con jq si está instalado, de lo contrario, se imprime como texto plano.
         - Los encabezados por defecto incluyen Content-Type y Accept-Language.
@@ -34,8 +37,14 @@ function Invoke-CustomWebRequest {
         [Alias("X")][string]$method = "GET",
         [Alias("d")][string]$data = "{}",
         [Alias("H")][string[]]$headers = @(),
-        [Alias("f")][string]$file = ""
+        [Alias("f")][string]$file = "",
+        [Alias("s")][switch]$silent
     )
+
+    if ($silent) {
+        echo "Hola, se silencio todo"
+        function Write-Host {}
+    }
 
     # Diccionario de headers por defecto
     $headersDict = @{
