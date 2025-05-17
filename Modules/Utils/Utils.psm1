@@ -1,9 +1,93 @@
 $defaultWorkspacePath = "C:\Workspace";
 
+function Find-TextInFiles {
+<#
+.SYNOPSIS
+Busca una cadena de texto en todos los archivos dentro de un directorio especifico y muestra las coincidencias encontradas.
+
+.DESCRIPTION
+La función Find-TextInFiles recorre recursivamente los archivos dentro de un directorio dado, buscando una cadena de texto especifica.
+Imprime los nombres de los archivos que contienen coincidencias y las lineas donde se encuentran. Si se especifica el parametro -DoOpen,
+permite abrir el archivo correspondiente en el Bloc de notas.
+
+.PARAMETER Query
+La cadena de texto a buscar dentro de los archivos. Este parametro es obligatorio.
+
+.PARAMETER Directory
+Ruta del directorio donde se realizara la busqueda. Por defecto es "src". Se puede abreviar con -d.
+
+.PARAMETER DoOpen
+Si se especifica, permite abrir en el Bloc de notas el archivo encontrado. Se puede abreviar con -o.
+
+.EXAMPLE
+Find-TextInFiles -Query "password"
+
+Busca la cadena "password" dentro del directorio "src" y muestra los archivos y lineas donde se encuentra.
+
+.EXAMPLE
+Find-TextInFiles -Query "TODO" -Directory "C:\Projects" -DoOpen
+
+Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coincidencias en el Bloc de notas.
+#>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Query,
+
+        [Alias("d")]
+        [string]$Directory = "src",
+
+        [Alias("f")]
+        [string]$Filter = "*",
+
+        [Alias("o")]
+        [switch]$DoOpen
+    )
+
+    $fileCounter = 0
+    $filesEncountered = @()
+    Get-ChildItem -Path $Directory -Recurse -File -Filter $Filter| ForEach-Object {
+        $filePath = $_.FullName -replace '\[', '`[' -replace '\]', '`]'
+        $fileName = $_.Name
+        $fileContent = Get-Content -Path $filePath
+        if ($fileContent -like "*$Query*") {
+            $filesEncountered += $filePath
+            Write-Host "$($fileCounter)`) $fileName"
+            $lineNumber = 0
+            Get-Content -Path $filePath | ForEach-Object {
+                $lineNumber++
+                if ($_ -like "*$Query*") {
+                    Write-Host "$($lineNumber): $($_.Trim())"
+                }
+            }
+            $fileCounter++
+            Write-Host ""
+        }
+    }
+
+    if (-not $DoOpen -or $filesEncountered.Count -eq 0) {
+        return
+    }
+
+    if ($filesEncountered.Count -eq 1) {
+		notepad $filesEncountered[0]
+        Select-Beep Success
+        return
+    }
+
+    $index = Read-Host "Type the file index: "
+    if ([int]::TryParse($index, [ref]$null) -and $index -ge 0 -and $index -lt $filesEncountered.Count) {
+        notepad $filesEncountered[$index]
+        Select-Beep Success
+    } else {
+        Select-Beep Fail
+    }
+}
+
 function Get-RAMUsed {
 <#
 .SYNOPSIS
-Muestra los procesos cuyo nombre coincide con el parámetro dado y calcula la RAM usada en MB.
+Muestra los procesos cuyo nombre coincide con el parametro dado y calcula la RAM usada en MB.
 
 .PARAMETER processName
 Nombre del proceso a buscar. Puede ser parcial.
@@ -39,7 +123,7 @@ Ejecuta un sonido de beep dependiendo del tipo especificado.
 Tipo de beep. Puede ser "Process", "Fail" o "Success". Por defecto es "Process".
 
 .DESCRIPTION
-Produce un beep con frecuencia y duración distintas según el tipo para indicar estado de procesos, errores o éxito.
+Produce un beep con frecuencia y duración distintas segun el tipo para indicar estado de procesos, errores o exito.
 
 .EXAMPLE
 Select-Beep -type "Fail"
@@ -64,7 +148,7 @@ Busca y navega a un directorio cuyo nombre contenga ciertas palabras clave.
 Arreglo de palabras que deben estar presentes en el nombre del directorio.
 
 .DESCRIPTION
-Recorre los subdirectorios en la ruta de trabajo predeterminada, y si encuentra coincidencias con todas las palabras, permite al usuario seleccionar uno y navega hacia él.
+Recorre los subdirectorios en la ruta de trabajo predeterminada, y si encuentra coincidencias con todas las palabras, permite al usuario seleccionar uno y navega hacia el.
 
 .EXAMPLE
 Select-DirectoryWithWords -words "api", "test"
@@ -123,13 +207,13 @@ function Open-FileByWord {
 Busca archivos por palabra clave y permite abrir uno con Notepad.
 
 .PARAMETER searchTerm
-Término que debe estar presente en el nombre del archivo.
+Termino que debe estar presente en el nombre del archivo.
 
 .PARAMETER directory
-Directorio base de búsqueda. Por defecto es "src".
+Directorio base de busqueda. Por defecto es "src".
 
 .DESCRIPTION
-Busca archivos recursivamente en un directorio, permite seleccionar uno si hay múltiples coincidencias y lo abre con Notepad.
+Busca archivos recursivamente en un directorio, permite seleccionar uno si hay multiples coincidencias y lo abre con Notepad.
 
 .EXAMPLE
 Open-FileByWord -searchTerm "config" -directory "src"
@@ -223,3 +307,4 @@ New-Alias -Name gtd -Value Select-DirectoryWithWords
 New-Alias -Name fof -Value Open-FileByWord
 New-Alias -Name ram -Value Get-RAMUsed
 New-Alias -Name modexports -Value Get-ExportedFunctionsAndAliasesFromModule
+New-Alias -Name ftf -Value Find-TextInFiles

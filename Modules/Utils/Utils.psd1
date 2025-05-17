@@ -22,14 +22,16 @@
         'Select-DirectoryWithWords',
         'Open-FileByWord',
         'Get-ConfigProp',
-        'Get-ExportedFunctionsAndAliasesFromModule'
+        'Get-ExportedFunctionsAndAliasesFromModule',
+        'Find-TextInFiles'
     )
 
     AliasesToExport = @(
         'ram',
         'gtd',
         'fof',
-        'modexports'
+        'modexports',
+        'ftf'
     )
 
     # No se exportan cmdlets ni variables
