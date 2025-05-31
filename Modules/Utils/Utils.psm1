@@ -1,5 +1,3 @@
-$defaultWorkspacePath = "C:\Workspace";
-
 function Find-TextInFiles {
 <#
 .SYNOPSIS
@@ -161,6 +159,7 @@ Alias: gtd
     )
 
     cls
+    $defaultWorkspacePath = Get-ConfigProp workspacePath
 
     if (-Not (Test-Path -Path $defaultWorkspacePath)) {
         Select-Beep Fail
@@ -265,7 +264,7 @@ Nombre de la propiedad a recuperar.
 Busca el archivo config.json en la ruta del perfil del usuario y devuelve el valor de la propiedad especificada si existe.
 
 .EXAMPLE
-Get-ConfigProp -prop "Token"
+Get-ConfigProp -prop "token"
 #>
 	param(
 		[Parameter(Mandatory = $true)][string]$prop
@@ -275,20 +274,21 @@ Get-ConfigProp -prop "Token"
 	$configPath = Join-Path $userPath 'config.json'
 
 	if (-not (Test-Path $configPath)) {
-		The config file was not found
+		notepad $configPath
+		Write-Host "Please setup the configuration file"
 		Select-Beep Fail
 		return
 	}
 
 	$configProps = Get-Content -Raw -Path $configPath | ConvertFrom-Json
 
-	if (-not $configProps.ContainsKey($prop)) {
+	if (-not $configProps.PSObject.Properties.Name -contains $prop) {
 		Write-Host The property does not exist in the config file
 		Select-Beep Fail
 		return
 	}
 
-	return $configProps[$prop]
+	return $configProps.$($prop)
 }
 
 function Get-ExportedFunctionsAndAliasesFromModule {

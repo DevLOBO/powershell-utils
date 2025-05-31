@@ -19,12 +19,6 @@ function Invoke-AIModelRequest {
     .PARAMETER Prompt
         Contenido del mensaje del usuario (rol "user") para el modelo.
 
-    .PARAMETER Model
-        Modelo a utilizar en la solicitud. Ejemplo: "qwen/qwen3-30b-a3b:free".
-
-    .PARAMETER Endpoint
-        URL del endpoint de la API. Por defecto usa el endpoint de chat completions.
-
     .PARAMETER AdditionalBody
         Parámetros adicionales que quieras incluir en el cuerpo, como temperature, max_tokens, etc. (hashtable).
     #>
@@ -32,11 +26,12 @@ function Invoke-AIModelRequest {
         [Parameter(Mandatory = $true)][string]$Prompt,
         [Alias("k")][string]$ApiKey = "GENAI_API_KEY",
         [Alias("i")][string]$Instructions = "",
-        [Alias("m")][string]$Model = "qwen/qwen3-30b-a3b:free",
-        [Alias("url")][string]$Endpoint = "https://openrouter.ai/api/v1/chat/completions",
         [Alias("cf")][string[]]$ContextFiles = @(),
         [hashtable]$AdditionalBody = @{}
     )
+
+    $Model = Get-ConfigProp aiModel
+    $Endpoint = Get-ConfigProp aiEndpoint
 
     # Construir el prompt
     $AIPrompt = if ($ContextFiles.Count -eq 0) { $Prompt } else {
