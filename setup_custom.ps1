@@ -36,3 +36,20 @@ if (Test-Path $sourcePath) {
 } else {
     Write-Host "La ruta de origen no existe: $sourcePath"
 }
+
+# Agregar el conteniido para el archivo config.json
+$configContent = @{}
+$configKeys = @("aiModel", "aiEndpoint", "scriptsPath", "workspacePath")
+foreach ($key in $configKeys) {
+	$configContent[$key] = ""
+}
+
+#Buscar la ruta para guardar config.json
+	$userPath = $env:PSModulePath -split ';' | Where-Object { $_ -match 'Users' } | Select-Object -First 1 | Split-Path -Parent
+	$configPath = Join-Path $userPath 'config.json'
+
+	if (-not (Test-Path $configPath)) {
+	$configJson = $configContent | ConvertTo-Json $depth 10
+	Set-Content $configJson -Path $configPath
+	Write-Host "Se creó el archivo config.json correctamente"
+}
