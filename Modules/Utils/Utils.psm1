@@ -14,6 +14,12 @@ La cadena de texto a buscar dentro de los archivos. Este parametro es obligatori
 .PARAMETER Directory
 Ruta del directorio donde se realizara la busqueda. Por defecto es "src". Se puede abreviar con -d.
 
+.PARAMETER ExcludeDirectories
+Lista de directorios que serán excluidos durante la búsqueda
+
+.PARAMETER ExcludeFiles
+Lista de archivos que serán excluidos de la búsqueda
+
 .PARAMETER DoOpen
 Si se especifica, permite abrir en el Bloc de notas el archivo encontrado. Se puede abreviar con -o.
 
@@ -35,6 +41,12 @@ Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coinc
         [Alias("d")]
         [string]$Directory = "src",
 
+        [Alias("xd")]
+        [string[]]$ExcludeDirectories = @(),
+
+        [Alias("xf")]
+        [string[]]$ExcludeFiles = @(),
+
         [Alias("f")]
         [string]$Filter = "*",
 
@@ -44,7 +56,43 @@ Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coinc
 
     $fileCounter = 0
     $filesEncountered = @()
-    Get-ChildItem -Path $Directory -Recurse -File -Filter $Filter| ForEach-Object {
+
+$files = Get-ChildItem -Path $Directory -Recurse -File -Filter $Filter
+
+if ($ExcludeDirectories.Count -gt 0) {
+$files = $files | Where-Object {
+$driveName = $_.PSDrive
+$dirPath = $_.DirectoryName
+$dirs = ($dirPath -split '\\') | Where-Object { $_ -and ($_ -ne "$($driveName):") }
+$flag = $true
+
+foreach($dir in $ExcludeDirectories) {
+if ($dirs -contains $dir) {
+$flag = $false
+break
+}
+}
+
+$flag
+}
+}
+
+if ($ExcludeFiles.Count -gt 0) {
+$files = $files | Where-Object {
+$flag = $true
+
+foreach($file in $ExcludeFiles) {
+if ($_.Name -like $file) {
+$flag = $false
+break
+}
+}
+
+$flag
+}
+}
+
+    $files | ForEach-Object {
         $filePath = $_.FullName -replace '\[', '`[' -replace '\]', '`]'
         $fileName = $_.Name
         $fileContent = Get-Content -Path $filePath
