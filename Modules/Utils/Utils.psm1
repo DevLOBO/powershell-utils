@@ -1,5 +1,5 @@
 function Find-TextInFiles {
-<#
+	<#
 .SYNOPSIS
 Busca una cadena de texto en todos los archivos dentro de un directorio especifico y muestra las coincidencias encontradas.
 
@@ -34,104 +34,105 @@ Find-TextInFiles -Query "TODO" -Directory "C:\Projects" -DoOpen
 Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coincidencias en el Bloc de notas.
 #>
 
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$Query,
+	param(
+		[Parameter(Mandatory = $true)]
+		[string]$Query,
 
-        [Alias("d")]
-        [string]$Directory = "src",
+		[Alias("d")]
+		[string]$Directory = "src",
 
-        [Alias("xd")]
-        [string[]]$ExcludeDirectories = @(),
+		[Alias("xd")]
+		[string[]]$ExcludeDirectories = @(),
 
-        [Alias("xf")]
-        [string[]]$ExcludeFiles = @(),
+		[Alias("xf")]
+		[string[]]$ExcludeFiles = @(),
 
-        [Alias("f")]
-        [string]$Filter = "*",
+		[Alias("f")]
+		[string]$Filter = "*",
 
-        [Alias("o")]
-        [switch]$DoOpen
-    )
+		[Alias("o")]
+		[switch]$DoOpen
+	)
 
-    $fileCounter = 0
-    $filesEncountered = @()
+	$fileCounter = 0
+	$filesEncountered = @()
 
-$files = Get-ChildItem -Path $Directory -Recurse -File -Filter $Filter
+	$files = Get-ChildItem -Path $Directory -Recurse -File -Filter $Filter
 
-if ($ExcludeDirectories.Count -gt 0) {
-$files = $files | Where-Object {
-$driveName = $_.PSDrive
-$dirPath = $_.DirectoryName
-$dirs = ($dirPath -split '\\') | Where-Object { $_ -and ($_ -ne "$($driveName):") }
-$flag = $true
+	if ($ExcludeDirectories.Count -gt 0) {
+		$files = $files | Where-Object {
+			$driveName = $_.PSDrive
+			$dirPath = $_.DirectoryName
+			$dirs = ($dirPath -split '\\') | Where-Object { $_ -and ($_ -ne "$($driveName):") }
+			$flag = $true
 
-foreach($dir in $ExcludeDirectories) {
-if ($dirs -contains $dir) {
-$flag = $false
-break
-}
-}
+			foreach ($dir in $ExcludeDirectories) {
+				if ($dirs -contains $dir) {
+					$flag = $false
+					break
+				}
+			}
 
-$flag
-}
-}
+			$flag
+		}
+	}
 
-if ($ExcludeFiles.Count -gt 0) {
-$files = $files | Where-Object {
-$flag = $true
+	if ($ExcludeFiles.Count -gt 0) {
+		$files = $files | Where-Object {
+			$flag = $true
 
-foreach($file in $ExcludeFiles) {
-if ($_.Name -like $file) {
-$flag = $false
-break
-}
-}
+			foreach ($file in $ExcludeFiles) {
+				if ($_.Name -like $file) {
+					$flag = $false
+					break
+				}
+			}
 
-$flag
-}
-}
+			$flag
+		}
+	}
 
-    $files | ForEach-Object {
-        $filePath = $_.FullName -replace '\[', '`[' -replace '\]', '`]'
-        $fileName = $_.Name
-        $fileContent = Get-Content -Path $filePath
-        if ($fileContent -like "*$Query*") {
-            $filesEncountered += $filePath
-            Write-Host "$($fileCounter)`) $fileName"
-            $lineNumber = 0
-            Get-Content -Path $filePath | ForEach-Object {
-                $lineNumber++
-                if ($_ -like "*$Query*") {
-                    Write-Host "$($lineNumber): $($_.Trim())"
-                }
-            }
-            $fileCounter++
-            Write-Host ""
-        }
-    }
+	$files | ForEach-Object {
+		$filePath = $_.FullName -replace '\[', '`[' -replace '\]', '`]'
+		$fileName = $_.Name
+		$fileContent = Get-Content -Path $filePath
+		if ($fileContent -like "*$Query*") {
+			$filesEncountered += $filePath
+			Write-Host "$($fileCounter)`) $fileName"
+			$lineNumber = 0
+			Get-Content -Path $filePath | ForEach-Object {
+				$lineNumber++
+				if ($_ -like "*$Query*") {
+					Write-Host "$($lineNumber): $($_.Trim())"
+				}
+			}
+			$fileCounter++
+			Write-Host ""
+		}
+	}
 
-    if (-not $DoOpen -or $filesEncountered.Count -eq 0) {
-        return
-    }
+	if (-not $DoOpen -or $filesEncountered.Count -eq 0) {
+		return
+	}
 
-    if ($filesEncountered.Count -eq 1) {
+	if ($filesEncountered.Count -eq 1) {
 		notepad $filesEncountered[0]
-        Select-Beep Success
-        return
-    }
+		Select-Beep Success
+		return
+	}
 
-    $index = Read-Host "Type the file index: "
-    if ([int]::TryParse($index, [ref]$null) -and $index -ge 0 -and $index -lt $filesEncountered.Count) {
-        notepad $filesEncountered[$index]
-        Select-Beep Success
-    } else {
-        Select-Beep Fail
-    }
+	$index = Read-Host "Type the file index: "
+	if ([int]::TryParse($index, [ref]$null) -and $index -ge 0 -and $index -lt $filesEncountered.Count) {
+		notepad $filesEncountered[$index]
+		Select-Beep Success
+	}
+	else {
+		Select-Beep Fail
+	}
 }
 
 function Get-RAMUsed {
-<#
+	<#
 .SYNOPSIS
 Muestra los procesos cuyo nombre coincide con el parametro dado y calcula la RAM usada en MB.
 
@@ -148,10 +149,10 @@ Get-RAMUsed -processName "chrome"
 Alias: ram
 #>
 	param(
-		[Parameter(Mandatory=$true)][Alias("p")][string]$processName
+		[Parameter(Mandatory = $true)][Alias("p")][string]$processName
 	)
 
-	$processes = Get-Process | Where-Object {$_.ProcessName -like "$processName"} | Select-Object ProcessName, Id, @{Name="RAM_MB"; Expression={[math]::Round($_.WS / 1MB, 2)}}
+	$processes = Get-Process | Where-Object { $_.ProcessName -like "$processName" } | Select-Object ProcessName, Id, @{Name = "RAM_MB"; Expression = { [math]::Round($_.WS / 1MB, 2) } }
 	$ramTotal = ($processes | Measure-Object RAM_MB -Sum).Sum
 	$processesCount = $processes.Count
 
@@ -161,7 +162,7 @@ Alias: ram
 }
 
 function Select-Beep {
-<#
+	<#
 .SYNOPSIS
 Ejecuta un sonido de beep dependiendo del tipo especificado.
 
@@ -186,7 +187,7 @@ Select-Beep -type "Fail"
 }
 
 function Select-DirectoryWithWords {
-<#
+	<#
 .SYNOPSIS
 Busca y navega a un directorio cuyo nombre contenga ciertas palabras clave.
 
@@ -202,54 +203,54 @@ Select-DirectoryWithWords -words "api", "test"
 .NOTES
 Alias: gtd
 #>
-    param (
-        [Alias("d")][string[]]$words
-    )
+	param (
+		[Alias("d")][string[]]$words
+	)
 
-    cls
-    $defaultWorkspacePath = Get-ConfigProp workspacePath
+	cls
+	$defaultWorkspacePath = Get-ConfigProp workspacePath
 
-    if (-Not (Test-Path -Path $defaultWorkspacePath)) {
-        Select-Beep Fail
-        return
-    }
+	if (-not (Test-Path -Path $defaultWorkspacePath)) {
+		Select-Beep Fail
+		return
+	}
 
-    $directories = Get-ChildItem -Path $defaultWorkspacePath -Directory
+	$directories = Get-ChildItem -Path $defaultWorkspacePath -Directory
 
-    $matchingDirectories = New-Object System.Collections.Generic.List[System.IO.DirectoryInfo]
-    foreach ($directory in $directories) {
-        $dirName = $directory.Name.ToLower()
+	$matchingDirectories = New-Object System.Collections.Generic.List[System.IO.DirectoryInfo]
+	foreach ($directory in $directories) {
+		$dirName = $directory.Name.ToLower()
 
-        $isMatch = $true
-        foreach ($word in $words) {
-            if (-Not $dirName.Contains($word.ToLower())) {
-                $isMatch = $false
-                break
-            }
-        }
+		$isMatch = $true
+		foreach ($word in $words) {
+			if (-not $dirName.Contains($word.ToLower())) {
+				$isMatch = $false
+				break
+			}
+		}
 
-        if ($isMatch) {
-            $matchingDirectories.Add($directory)
-        }
-    }
+		if ($isMatch) {
+			$matchingDirectories.Add($directory)
+		}
+	}
 
-    if ($matchingDirectories.Count -eq 0) {
-        Select-Beep Fail
-        return
-    }
+	if ($matchingDirectories.Count -eq 0) {
+		Select-Beep Fail
+		return
+	}
 
-    $index = 0
-    if ($matchingDirectories.Count -gt 1) {
-        $matchingDirectories | ForEach-Object { Write-Host "$([Array]::IndexOf($matchingDirectories, $_)): $_" }
-        $index = Read-Host "Select the index of the directory: "
-    }
-    $selectedDirectory = $matchingDirectories[$index]
-    Set-Location -Path $selectedDirectory.FullName
-    Select-Beep Success
+	$index = 0
+	if ($matchingDirectories.Count -gt 1) {
+		$matchingDirectories | ForEach-Object { Write-Host "$([Array]::IndexOf($matchingDirectories, $_)): $_" }
+		$index = Read-Host "Select the index of the directory: "
+	}
+	$selectedDirectory = $matchingDirectories[$index]
+	Set-Location -Path $selectedDirectory.FullName
+	Select-Beep Success
 }
 
 function Open-FileByWord {
-<#
+	<#
 .SYNOPSIS
 Busca archivos por palabra clave y permite abrir uno con Notepad.
 
@@ -268,40 +269,40 @@ Open-FileByWord -searchTerm "config" -directory "src"
 .NOTES
 Alias: fof
 #>
-    param (
-        [string]$searchTerm,
-        [Alias("d")][string]$directory="src"
-    )
+	param (
+		[string]$searchTerm,
+		[Alias("d")][string]$directory = "src"
+	)
 
-    $path = Join-Path -Path "." -ChildPath $directory
-    $files = Get-ChildItem -Path $path -Recurse -File | Where-Object { $_.Name -like "*$searchTerm*" }
+	$path = Join-Path -Path "." -ChildPath $directory
+	$files = Get-ChildItem -Path $path -Recurse -File | Where-Object { $_.Name -like "*$searchTerm*" }
 
-    if ($files.Count -eq 0) {
-        Select-Beep Fail
-    }
-    elseif ($files.Count -eq 1) {
-        Select-Beep Success
-        Start-Process notepad.exe $files.FullName
-    }
-    else {
-        Select-Beep
-        $files | ForEach-Object { Write-Host "$([Array]::IndexOf($files, $_)): $_" }
+	if ($files.Count -eq 0) {
+		Select-Beep Fail
+	}
+	elseif ($files.Count -eq 1) {
+		Select-Beep Success
+		Start-Process notepad.exe $files.FullName
+	}
+	else {
+		Select-Beep
+		$files | ForEach-Object { Write-Host "$([Array]::IndexOf($files, $_)): $_" }
 
-        $index = Read-Host "Select the index of the file: "
+		$index = Read-Host "Select the index of the file: "
 
-        if ($index -ge 0 -and $index -lt $files.Count) {
-            $selectedFile = $files[$index]
-            Select-Beep Success
-            Start-Process notepad.exe $selectedFile.FullName
-        }
-        else {
-            Select-Beep Fail
-        }
-    }
+		if ($index -ge 0 -and $index -lt $files.Count) {
+			$selectedFile = $files[$index]
+			Select-Beep Success
+			Start-Process notepad.exe $selectedFile.FullName
+		}
+		else {
+			Select-Beep Fail
+		}
+	}
 }
 
 function Get-ConfigProp {
-<#
+	<#
 .SYNOPSIS
 Obtiene el valor de una propiedad desde un archivo de configuración JSON del usuario.
 
@@ -341,7 +342,7 @@ Get-ConfigProp -prop "token"
 
 function Get-ExportedFunctionsAndAliasesFromModule {
 	param(
-		[Parameter(Mandatory=$true)][string]$moduleName
+		[Parameter(Mandatory = $true)][string]$moduleName
 	)
 
 	Write-Host "Functions:"
@@ -356,3 +357,5 @@ New-Alias -Name fof -Value Open-FileByWord
 New-Alias -Name ram -Value Get-RAMUsed
 New-Alias -Name modexports -Value Get-ExportedFunctionsAndAliasesFromModule
 New-Alias -Name ftf -Value Find-TextInFiles
+
+

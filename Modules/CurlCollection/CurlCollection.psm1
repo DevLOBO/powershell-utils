@@ -36,7 +36,8 @@ function Invoke-CurlCommand {
 	if ($hasBody) {
 		$body = if ($commandInfo.ContainsKey("body")) {
 			$commandInfo["body"]
-		} else {
+		}
+		else {
 			$bodyFilePath = Join-Path $apps[$app].FullName $commandInfo["bodyFile"]
 			Get-Content -Raw -Path $bodyFilePath | ConvertFrom-Json
 		}
@@ -54,7 +55,8 @@ function Invoke-CurlCommand {
 		req $fullUri -X $method -d $($body | ConvertTo-Json -Compress) -H $headers
 
 		$curlCommand = 'req "{0}" -X {1} -d ''{2}''' -f $fullUri, $method, $bodyString
-	} else {
+	}
+	else {
 		req $fullUri -X $method -H $headers
 
 		$curlCommand = 'req "{0}" -X {1}' -f $fullUri, $method
@@ -68,9 +70,9 @@ function Invoke-CurlCommand {
 
 function Set-NestedProp {
 	param(
-		[Parameter(Mandatory=$true)][hashtable]$hashtable,
-		[Parameter(Mandatory=$true)][string[]]$props,
-		[Parameter(Mandatory=$true)][object]$value
+		[Parameter(Mandatory = $true)][hashtable]$hashtable,
+		[Parameter(Mandatory = $true)][string[]]$props,
+		[Parameter(Mandatory = $true)][object]$value
 	)
 
 	$currentHashtable = $hashtable
@@ -88,7 +90,7 @@ function Set-NestedProp {
 
 function ConvertTo-TypedValue {
 	param(
-		[Parameter(Mandatory=$true)][string]$inputString
+		[Parameter(Mandatory = $true)][string]$inputString
 	)
 
 	if ($inputString -eq "" -or $inputString -eq "null" -or $inputString.Length -lt 2) {
@@ -101,16 +103,16 @@ function ConvertTo-TypedValue {
 	switch ($suffix) {
 		"s" { return $val }
 		"i" { return [int]$val }
-		"d" {return [double]$val }
-		"b" {return [bool]$val }
+		"d" { return [double]$val }
+		"b" { return [bool]$val }
 	}
 
 }
 
 function Get-CurlCommandString {
 	param(
-		[Parameter(Mandatory=$true)][string]$url,
-		[Parameter(Mandatory=$true)][string]$method,
+		[Parameter(Mandatory = $true)][string]$url,
+		[Parameter(Mandatory = $true)][string]$method,
 		[string]$body,
 		[string[]]$headers,
 		[switch]$curl
@@ -135,3 +137,5 @@ function Get-CurlCommandString {
 }
 
 Set-Alias icc Invoke-CurlCommand
+
+
