@@ -49,7 +49,7 @@ foreach ($key in $configKeys) {
 	$configPath = Join-Path $userPath 'config.json'
 
 	if (-not (Test-Path $configPath)) {
-	$configJson = $configContent | ConvertTo-Json $depth 10
+	$configJson = $configContent | ConvertTo-Json -Depth 10
 	Set-Content $configJson -Path $configPath
 	Write-Host "Se creó el archivo config.json correctamente"
 }
