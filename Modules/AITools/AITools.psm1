@@ -71,6 +71,14 @@ function Invoke-AIModelRequest {
 
 	Clear-Host
 	$responseObj = Get-Content -Path .\res.json -Raw | ConvertFrom-Json
+	rm res.json
+
+	if (-not $responseObj.choices) {
+		Select-Beep Fail
+		Write-Host "The response from API was failed"
+		return
+	}
+
 	$content = $responseObj.choices[0].message.content
 
 	Write-Host "Prompt Tokens: $($responseObj.usage.prompt_tokens)"
@@ -82,5 +90,3 @@ function Invoke-AIModelRequest {
 }
 
 New-Alias -Value Invoke-AIModelRequest -Name aiq
-
-
