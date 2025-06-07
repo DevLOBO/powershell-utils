@@ -26,6 +26,9 @@ function Invoke-CustomWebRequest {
     .PARAMETER silent
         Desactiva la salida en consola
 
+    .PARAMETER outputFile
+        Guarda la respuesta en un archivo
+
     .NOTES
         - La salida se muestra formateada con jq si está instalado, de lo contrario, se imprime como texto plano.
         - Los encabezados por defecto incluyen Content-Type y Accept-Language.
@@ -38,11 +41,11 @@ function Invoke-CustomWebRequest {
 		[Alias("d")][string]$data = "{}",
 		[Alias("H")][string[]]$headers = @(),
 		[Alias("f")][string]$file = "",
-		[Alias("s")][switch]$silent
+		[Alias("s")][switch]$silent,
+		[Alias("o")][string]$outputFile
 	)
 
 	if ($silent) {
-		echo "Hola, se silencio todo"
 		function Write-Host {}
 	}
 
@@ -127,7 +130,9 @@ function Invoke-CustomWebRequest {
 		}
 	}
 
-	$content | Out-File -Encoding UTF8 "./res.json"
+	if ($outputFile -ne "") {
+		$content | Out-File -Encoding UTF8 $outputFile
+	}
 }
 
 New-Alias -Name req -Value Invoke-CustomWebRequest

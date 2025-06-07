@@ -67,11 +67,12 @@ function Invoke-AIModelRequest {
 	$headers = @("Authorization: Bearer $ApiKey")
 
 	# Ejecutar solicitud
-	Invoke-CustomWebRequest -uri $Endpoint -method "POST" -data $jsonBody -headers $headers
+	$outputFile = 'res.json'
+	Invoke-CustomWebRequest -uri $Endpoint -method "POST" -data $jsonBody -headers $headers -outputFile $outputFile -silent
 
 	Clear-Host
 	$responseObj = Get-Content -Path .\res.json -Raw | ConvertFrom-Json
-	rm res.json
+	rm $outputFile
 
 	if (-not $responseObj.choices) {
 		Select-Beep Fail
