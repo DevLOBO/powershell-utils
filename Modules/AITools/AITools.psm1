@@ -21,13 +21,17 @@ function Invoke-AIModelRequest {
 
     .PARAMETER AdditionalBody
         Parámetros adicionales que quieras incluir en el cuerpo, como temperature, max_tokens, etc. (hashtable).
+
+    .PARAMETER OutputFile
+        Ruta del archivo dónde se guardará la respuesta
     #>
 	param(
 		[Parameter(Mandatory = $true)][string]$Prompt,
 		[Alias("k")][string]$ApiKey = "GENAI_API_KEY",
 		[Alias("i")][string]$Instructions = "",
 		[Alias("cf")][string[]]$ContextFiles = @(),
-		[hashtable]$AdditionalBody = @{}
+		[Alias("eb")][hashtable]$AdditionalBody = @{},
+		[Alias("o")][string]$OutputFile
 	)
 
 	$Model = Get-ConfigProp aiModel
@@ -67,12 +71,10 @@ function Invoke-AIModelRequest {
 	$headers = @("Authorization: Bearer $ApiKey")
 
 	# Ejecutar solicitud
-	$outputFile = 'res.json'
-	Invoke-CustomWebRequest -uri $Endpoint -method "POST" -data $jsonBody -headers $headers -outputFile $outputFile -silent
+	Invoke-CustomWebRequest -uri $Endpoint -method "POST" -data $jsonBody -headers $headers -outputFile $OutputFile -silent
 
 	Clear-Host
-	$responseObj = Get-Content -Path .\res.json -Raw | ConvertFrom-Json
-	rm $outputFile
+	$responseObj = Get-Content -Path $OutputFile -Raw | ConvertFrom-Json
 
 	if (-not $responseObj.choices) {
 		Select-Beep Fail
@@ -81,6 +83,10 @@ function Invoke-AIModelRequest {
 	}
 
 	$content = $responseObj.choices[0].message.content
+
+	if ($OutputFile -ne "") {
+		Set-Content $content -Path $OutputFile
+	}
 
 	Write-Host "Prompt Tokens: $($responseObj.usage.prompt_tokens)"
 	Write-Host "Output Tokens: $($responseObj.usage.completion_tokens)"
