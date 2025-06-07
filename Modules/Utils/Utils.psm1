@@ -270,12 +270,13 @@ Open-FileByWord -searchTerm "config" -directory "src"
 Alias: fof
 #>
 	param (
-		[string]$searchTerm,
+		[Parameter(Mandatory=$true)][string[]]$searchTerm,
 		[Alias("d")][string]$directory = "src"
 	)
 
 	$path = Join-Path -Path "." -ChildPath $directory
-	$files = Get-ChildItem -Path $path -Recurse -File | Where-Object { $_.Name -like "*$searchTerm*" }
+	$pattern = ($searchTerm | ForEach-Object { "(?=.*$_)" }) -join ''
+	$files = Get-ChildItem -Path $path -Recurse -File | Where-Object { $_.Name -match $pattern }
 
 	if ($files.Count -eq 0) {
 		Select-Beep Fail
