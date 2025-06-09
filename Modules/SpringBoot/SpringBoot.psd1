@@ -21,7 +21,8 @@
         'New-NativeImage',
         'Start-SpringDev',
         'Start-SpringDevDebug',
-        'Measure-SurefireReports'
+        'Measure-SurefireReports',
+        'Start-MavenBuild'
     )
 
     AliasesToExport = @(
@@ -29,7 +30,8 @@
         'natimg',
         'spdev',
         'spdbg',
-        'sfrep'
+        'sfrep',
+        'mcp'
     )
 
     # No se exportan cmdlets ni variables

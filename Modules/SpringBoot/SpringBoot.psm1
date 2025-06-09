@@ -1,3 +1,8 @@
+function Start-MavenBuild {
+	cls
+	mvn clean package
+}
+
 function Watch-SpringBootActuatorMetrics {
 	<#
     .SYNOPSIS
@@ -119,5 +124,4 @@ New-Alias -Name natimg -Value New-NativeImage
 New-Alias -Name spdev -Value Start-SpringDev
 New-Alias -Name spdbg -Value Start-SpringDevDebug
 New-Alias -Name sfrep -Value Measure-SurefireReports
-
-
+New-Alias -Name mcp -Value Start-MavenBuild
