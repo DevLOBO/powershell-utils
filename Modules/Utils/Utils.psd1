@@ -23,7 +23,8 @@
         'Open-FileByWord',
         'Get-ConfigProp',
         'Get-ExportedFunctionsAndAliasesFromModule',
-        'Find-TextInFiles'
+        'Find-TextInFiles',
+        'Invoke-IfSuccess'
     )
 
     AliasesToExport = @(
@@ -31,7 +32,8 @@
         'gtd',
         'fof',
         'modexports',
-        'ftf'
+        'ftf',
+        'and'
     )
 
     # No se exportan cmdlets ni variables

@@ -1,3 +1,20 @@
+function Invoke-IfSuccess {
+	param(
+		[Parameter(Mandatory=$true)][string]$cmd1,
+		[Parameter(Mandatory=$true)][string]$cmd2
+	)
+
+	Clear-Host
+	Invoke-Expression $cmd1
+
+	if ($LASTEXITCODE -eq 0) {
+		Invoke-Expression $cmd2
+		Select-Beep Success
+	} else {
+		Select-Beep Fail
+	}
+}
+
 function Find-TextInFiles {
 	<#
 .SYNOPSIS
@@ -358,5 +375,4 @@ New-Alias -Name fof -Value Open-FileByWord
 New-Alias -Name ram -Value Get-RAMUsed
 New-Alias -Name modexports -Value Get-ExportedFunctionsAndAliasesFromModule
 New-Alias -Name ftf -Value Find-TextInFiles
-
-
+New-Alias -Name and -Value Invoke-IfSuccess
