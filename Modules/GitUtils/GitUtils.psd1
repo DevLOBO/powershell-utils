@@ -24,10 +24,10 @@
     )
 
     AliasesToExport = @(
-        'gcgb',
-        'gfgb',
-        'crgr',
-        'ngcp'
+        'gcb',
+        'gfb',
+        'cgr',
+        'gcp'
     )
 
     CmdletsToExport   = @()
