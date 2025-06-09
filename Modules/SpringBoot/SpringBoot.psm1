@@ -1,6 +1,6 @@
 function Start-MavenBuild {
 	cls
-	mvn clean package
+	mvn clean package $args
 }
 
 function Watch-SpringBootActuatorMetrics {
