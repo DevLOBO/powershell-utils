@@ -221,7 +221,7 @@ Select-DirectoryWithWords -words "api", "test"
 Alias: gtd
 #>
 	param (
-		[Alias("d")][string[]]$words
+		[string[]]$words
 	)
 
 	cls
@@ -229,6 +229,12 @@ Alias: gtd
 
 	if (-not (Test-Path -Path $defaultWorkspacePath)) {
 		Select-Beep Fail
+		return
+	}
+
+	if ($words.Count -eq 0) {
+		Set-Location -Path $defaultWorkspacePath
+		Select-Beep Success
 		return
 	}
 
