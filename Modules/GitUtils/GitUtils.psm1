@@ -96,7 +96,7 @@ function Copy-RemoteGitRepository {
 }
 
 # Alias sugeridos
-New-Alias -Name gcb     -Value Get-CurrentGitBranch     # Get Current Git Branch
-New-Alias -Name gfb     -Value Get-FilteredGitBranches  # Get Filtered Git Branches
-New-Alias -Name cgr     -Value Copy-RemoteGitRepository # Copy Remote Git Repository
-New-Alias -Name gcp -Value New-CommitAndPush
+New-Alias -Name curbran     -Value Get-CurrentGitBranch     # Get Current Git Branch
+New-Alias -Name filbran     -Value Get-FilteredGitBranches  # Get Filtered Git Branches
+New-Alias -Name remrepo     -Value Copy-RemoteGitRepository # Copy Remote Git Repository
+New-Alias -Name pushit -Value New-CommitAndPush
