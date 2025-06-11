@@ -20,14 +20,16 @@
         'Get-CurrentGitBranch',
         'Get-FilteredGitBranches',
         'Copy-RemoteGitRepository',
-        'New-CommitAndPush'
+        'New-CommitAndPush',
+        'Invoke-GitAutoSquash'
     )
 
     AliasesToExport = @(
         'curbran',
         'filbran',
         'remrepo',
-        'pushit'
+        'pushit',
+        'gitsquash'
     )
 
     CmdletsToExport   = @()
