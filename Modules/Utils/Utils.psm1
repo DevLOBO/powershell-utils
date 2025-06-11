@@ -1,18 +1,24 @@
 function Invoke-IfSuccess {
 	param(
-		[Parameter(Mandatory=$true)][string]$cmd1,
-		[Parameter(Mandatory=$true)][string]$cmd2
+		[Parameter(ValueFromRemainingArguments=$true)][string[]]$Commands
 	)
 
 	Clear-Host
-	Invoke-Expression $cmd1
+	foreach($command in $Commands) {
+		try {
+			Invoke-Expression $command
+		} catch {
+			Select-Beep Fail
+			return
+		}
 
-	if ($LASTEXITCODE -eq 0) {
-		Invoke-Expression $cmd2
-		Select-Beep Success
-	} else {
-		Select-Beep Fail
+		if ($LASTEXITCODE -ne 0) {
+			Select-Beep Fail
+			return
+		}
 	}
+
+	Select-Beep Success
 }
 
 function Find-TextInFiles {
