@@ -4,8 +4,7 @@ function Invoke-AIModelRequest {
         Envía una solicitud POST a una API para ejecutar un modelo de lenguaje IA usando la función personalizada Invoke-CustomWebRequest.
 
     .DESCRIPTION
-        Esta función permite personalizar el endpoint, los encabezados, y el cuerpo de la solicitud para consumir una API de IA.
-        Guarda la respuesta por defecto en 'res.json'.
+        Esta función permite hacer una llamda HTTP que utilice el estándar de OpenAI en su API para la consulta de LLMs.
 
     .PARAMETER ApiKey
         Nombre de la variable de entorno dónde está la ApiKey a usar
@@ -49,7 +48,7 @@ function Invoke-AIModelRequest {
 		messages = @(
 			@{
 				role = "system"
-				content = "Eres un asistente que responde directamente, sin texto introductorio/explicativo o elogios innecesarios. Analiza el idioma del prompt del usuario, y responde siempre en el mismo idioma del usuario, a menos que te solicite explicítamente que respondas en un idioma distinto. No actives el modo de razonamiento /nothinking. $Instructions".Trim()
+				content = "Eres un asistente que responde directamente, sin texto introductorio/explicativo o elogios innecesarios. Analiza el idioma del prompt del usuario, y responde siempre en el mismo idioma del usuario, a menos que te solicite explicítamente que respondas en un idioma distinto. /nothinking. $Instructions".Trim()
 			}
 			@{
 				role = "user"
@@ -71,6 +70,12 @@ function Invoke-AIModelRequest {
 	$headers = @("Authorization: Bearer $ApiKey")
 
 	# Ejecutar solicitud
+	$existsOutputFile = $false
+	if ($OutputFile -ne "") {
+		$existsOutputFile = $true
+	} else {
+		$OutputFile = "res.json"
+	}
 	Invoke-CustomWebRequest -uri $Endpoint -method "POST" -data $jsonBody -headers $headers -outputFile $OutputFile -silent
 
 	Clear-Host
@@ -84,8 +89,10 @@ function Invoke-AIModelRequest {
 
 	$content = $responseObj.choices[0].message.content
 
-	if ($OutputFile -ne "") {
+	if ($existsOutputFile) {
 		Set-Content $content -Path $OutputFile
+	} else {
+		rm $OutputFile -Force
 	}
 
 	Write-Host "Prompt Tokens: $($responseObj.usage.prompt_tokens)"
