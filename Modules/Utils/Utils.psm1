@@ -300,7 +300,7 @@ Alias: fof
 #>
 	param (
 		[Parameter(Mandatory=$true)][string[]]$searchTerm,
-		[Alias("d")][string]$directory = "src"
+		[Alias("d")][string]$directory = ""
 	)
 
 	$path = Join-Path -Path "." -ChildPath $directory
