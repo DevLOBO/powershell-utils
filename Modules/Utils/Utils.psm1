@@ -1,3 +1,30 @@
+class ProgressBar {
+    [int]$Total
+    [int]$BarLength = 40
+    [datetime]$LastUpdate
+    [double]$IntervalSeconds
+
+    ProgressBar([int]$total, [double]$intervalSeconds = 2) {
+        $this.Total = $total
+        $this.IntervalSeconds = $intervalSeconds
+        $this.LastUpdate = [datetime]::MinValue
+    }
+
+    [void] Update([int]$current) {
+        $now = Get-Date
+        $elapsed = ($now - $this.LastUpdate).TotalSeconds
+
+        if ($elapsed -ge $this.IntervalSeconds -or $current -eq $this.Total) {
+            $this.LastUpdate = $now
+            $percent = [math]::Round(($current / $this.Total) * 100)
+            $filledLength = [math]::Round(($this.BarLength * $current) / $this.Total)
+            $bar = ('#' * $filledLength).PadRight($this.BarLength)
+
+            Write-Host -NoNewline "`r[$bar] $percent% ($current / $($this.Total))"
+        }
+    }
+}
+
 function Invoke-IfSuccess {
 	param(
 		[Parameter(ValueFromRemainingArguments=$true)][string[]]$Commands
@@ -115,22 +142,29 @@ Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coinc
 		}
 	}
 
+	$progress = [ProgressBar]::new($files.Count, 2)
+	$itemProgress = 0
+	$textToShow = ""
+
 	$files | ForEach-Object {
+		$itemProgress++
+		$progress.Update($itemProgress)
+
 		$filePath = $_.FullName -replace '\[', '`[' -replace '\]', '`]'
 		$fileName = $_.Name
 		$fileContent = Get-Content -Path $filePath
 		if ($fileContent -like "*$Query*") {
 			$filesEncountered += $filePath
-			Write-Host "$($fileCounter)`) $fileName"
+			$textToShow += "$($fileCounter)`) $fileName`n"
 			$lineNumber = 0
 			Get-Content -Path $filePath | ForEach-Object {
 				$lineNumber++
 				if ($_ -like "*$Query*") {
-					Write-Host "$($lineNumber): $($_.Trim())"
+					$textToShow += "$($lineNumber): $($_.Trim())`n"
 				}
 			}
 			$fileCounter++
-			Write-Host ""
+			$textToShow += "`n"
 		}
 	}
 
@@ -144,6 +178,8 @@ Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coinc
 		return
 	}
 
+	Clear-Host
+	Write-Show $textToShow
 	$index = Read-Host "Type the file index: "
 	if ([int]::TryParse($index, [ref]$null) -and $index -ge 0 -and $index -lt $filesEncountered.Count) {
 		notepad $filesEncountered[$index]
