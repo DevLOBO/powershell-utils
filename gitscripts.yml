@@ -1,0 +1,10 @@
+alias:
+  sq: "!~/.gitscripts/git-squash.sh"
+  s: "!(git status -s)"
+  lg: "!f() { git log --oneline $1; }; f"
+  cb: "!~/.gitscripts/git-current-branch.sh"
+  ai: "!~/.gitscripts/git-add-interactive.sh"
+  cc: "!~/.gitscripts/git-current-commit.sh"
+  cr: "!~/.gitscripts/git-current-remote.sh"
+  fb: "!~/.gitscripts/git-filter-branch.sh"
+  sc: "!~/.gitscripts/git-show-changes.sh"
