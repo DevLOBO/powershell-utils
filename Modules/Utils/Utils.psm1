@@ -25,6 +25,192 @@ class ProgressBar {
     }
 }
 
+function Remove-FilteredItems {
+    <#
+    .SYNOPSIS
+    Busca y elimina recursivamente elementos que coincidan con un filtro específico.
+    
+    .DESCRIPTION
+    Esta función busca recursivamente todos los elementos que coincidan con un parámetro de filtro
+    utilizando las reglas de -Filter de Get-ChildItem, y luego los elimina con confirmación del usuario.
+    
+    .PARAMETER Path
+    Ruta donde iniciar la búsqueda. Por defecto es el directorio actual.
+    
+    .PARAMETER Filter
+    Filtro para buscar elementos (utiliza las reglas de -Filter de Get-ChildItem).
+    
+    .PARAMETER f
+    Switch para filtrar únicamente archivos.
+    
+    .PARAMETER d
+    Switch para filtrar únicamente directorios.
+    
+    .PARAMETER p
+    Switch para imprimir la ruta de todos los elementos encontrados.
+    
+    .EXAMPLE
+    Remove-FilteredItems -Filter "*.tmp" -f
+    Busca y elimina todos los archivos .tmp recursivamente.
+    
+    .EXAMPLE
+    Remove-FilteredItems -Filter "*cache*" -d -p
+    Busca directorios que contengan "cache" en el nombre, muestra las rutas y los elimina.
+    #>
+    
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Filter,
+        
+        [Parameter(Mandatory = $false)]
+        [string]$Path = ".",
+        
+        [Parameter(Mandatory = $false)]
+        [switch]$f,  # Solo archivos
+        
+        [Parameter(Mandatory = $false)]
+        [switch]$d,  # Solo directorios
+        
+        [Parameter(Mandatory = $false)]
+        [switch]$p   # Imprimir rutas
+    )
+    
+    # Validar que no se usen ambos switches -f y -d
+    if ($f -and $d) {
+        Write-Error "No se pueden usar los parámetros -f y -d simultáneamente."
+        return
+    }
+    
+    Write-Host "Buscando elementos..." -ForegroundColor Yellow
+    
+    try {
+        # Construir parámetros para Get-ChildItem
+        $getChildItemParams = @{
+            Path = $Path
+            Filter = $Filter
+            Recurse = $true
+            ErrorAction = 'SilentlyContinue'
+        }
+        
+        # Aplicar filtros según los switches
+        if ($f) {
+            $getChildItemParams.File = $true
+            $itemType = "archivos"
+        }
+        elseif ($d) {
+            $getChildItemParams.Directory = $true
+            $itemType = "directorios"
+        }
+        else {
+            $itemType = "elementos"
+        }
+        
+        # Obtener elementos que coincidan con el filtro
+        $allItems = Get-ChildItem @getChildItemParams
+        
+        # Si estamos buscando directorios, filtrar solo los directorios padre
+        # usando un método más eficiente: contar coincidencias del nombre en la ruta
+        if ($d -and $allItems.Count -gt 0) {
+            $items = @()
+            
+            foreach ($item in $allItems) {
+                # Dividir la ruta en segmentos y contar coincidencias con el filtro
+                $pathSegments = $item.FullName.Split([System.IO.Path]::DirectorySeparatorChar, [System.StringSplitOptions]::RemoveEmptyEntries)
+                $matchCount = 0
+                
+                foreach ($segment in $pathSegments) {
+                    if ($segment -like $Filter) {
+                        $matchCount++
+                    }
+                }
+                
+                # Solo incluir si hay exactamente una coincidencia (directorio padre)
+                if ($matchCount -eq 1) {
+                    $items += $item
+                }
+            }
+        }
+        else {
+            $items = $allItems
+        }
+        
+        if ($items.Count -eq 0) {
+            Write-Host "No se encontraron $itemType que coincidan con el filtro '$Filter'." -ForegroundColor Green
+            return
+        }
+        
+        # Mostrar información adicional si se filtraron directorios anidados
+        if ($d -and $allItems.Count -gt $items.Count) {
+            Write-Host "Se encontraron $($allItems.Count) $itemType en total, pero se procesarán solo $($items.Count) directorios padre" -ForegroundColor Cyan
+            Write-Host "(Los directorios anidados se excluyen para evitar conflictos al eliminar recursivamente)" -ForegroundColor Gray
+        }
+        else {
+            Write-Host "Se encontraron $($items.Count) $itemType que coinciden con el filtro '$Filter'." -ForegroundColor Cyan
+        }
+        
+        # Mostrar rutas si se especifica el parámetro -p
+        if ($p) {
+            Write-Host "`nRutas encontradas:" -ForegroundColor Magenta
+            foreach ($item in $items) {
+                Write-Host "  $($item.FullName)" -ForegroundColor Gray
+            }
+            Write-Host ""
+        }
+        
+        # Pedir confirmación
+        $confirmation = Read-Host "¿Estás seguro de que quieres eliminar estos $($items.Count) $itemType? (s/N)"
+        
+        if ($confirmation -notmatch '^[sS]$') {
+            Write-Host "Operación cancelada." -ForegroundColor Yellow
+            return
+        }
+        
+        # Inicializar barra de progreso
+        $progress = [ProgressBar]::new($items.Count, 2)
+        $deletedCount = 0
+        $errorCount = 0
+        
+        Write-Host "`nEliminando $itemType..." -ForegroundColor Red
+        
+        # Eliminar elementos con barra de progreso
+        for ($i = 0; $i -lt $items.Count; $i++) {
+            $item = $items[$i]
+            
+            try {
+                if ($item.PSIsContainer) {
+                    # Es un directorio
+                    Remove-Item -Path $item.FullName -Recurse -Force -ErrorAction Stop
+                }
+                else {
+                    # Es un archivo
+                    Remove-Item -Path $item.FullName -Force -ErrorAction Stop
+                }
+                $deletedCount++
+            }
+            catch {
+                Write-Warning "Error al eliminar: $($item.FullName) - $($_.Exception.Message)"
+                $errorCount++
+            }
+            
+            # Actualizar barra de progreso
+            $progress.Update($i + 1)
+        }
+        
+        # Mostrar resumen final
+        Write-Host "`n" -NoNewline
+        Write-Host "Operación completada:" -ForegroundColor Green
+        Write-Host "  - Eliminados exitosamente: $deletedCount $itemType" -ForegroundColor Green
+        
+        if ($errorCount -gt 0) {
+            Write-Host "  - Errores: $errorCount $itemType" -ForegroundColor Red
+        }
+    }
+    catch {
+        Write-Error "Error durante la operación: $($_.Exception.Message)"
+    }
+}
+
 function Invoke-IfSuccess {
 	param(
 		[Parameter(ValueFromRemainingArguments=$true)][string[]]$Commands
@@ -89,7 +275,7 @@ Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coinc
 		[string]$Query,
 
 		[Alias("d")]
-		[string]$Directory = "src",
+		[string]$Directory = ".",
 
 		[Alias("xd")]
 		[string[]]$ExcludeDirectories = @(),
@@ -157,18 +343,25 @@ Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coinc
 			$filesEncountered += $filePath
 			$textToShow += "$($fileCounter)`) $fileName`n"
 			$lineNumber = 0
-			Get-Content -Path $filePath | ForEach-Object {
+			$fileContent | ForEach-Object {
 				$lineNumber++
 				if ($_ -like "*$Query*") {
 					$textToShow += "$($lineNumber): $($_.Trim())`n"
 				}
 			}
 			$fileCounter++
-			$textToShow += "`n"
+	$textToShow += "`n"
 		}
 	}
 
-	if (-not $DoOpen -or $filesEncountered.Count -eq 0) {
+	if ($filesEncountered.Count -eq 0) {
+		return
+	}
+
+	Clear-Host
+	Write-Host $textToShow
+
+	if (-not $DoOpen) {
 		return
 	}
 
@@ -178,8 +371,6 @@ Busca "TODO" en el directorio "C:\Projects" y permite abrir el archivo con coinc
 		return
 	}
 
-	Clear-Host
-	Write-Show $textToShow
 	$index = Read-Host "Type the file index: "
 	if ([int]::TryParse($index, [ref]$null) -and $index -ge 0 -and $index -lt $filesEncountered.Count) {
 		notepad $filesEncountered[$index]
@@ -424,3 +615,4 @@ New-Alias -Name ram -Value Get-RAMUsed
 New-Alias -Name modexports -Value Get-ExportedFunctionsAndAliasesFromModule
 New-Alias -Name ftf -Value Find-TextInFiles
 New-Alias -Name and -Value Invoke-IfSuccess
+New-Alias -Value Remove-FilteredItems -Name rmr
