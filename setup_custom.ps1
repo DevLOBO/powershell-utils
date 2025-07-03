@@ -249,14 +249,21 @@ function Install-GitScripts {
             return $true
         }
         
+        $rootScriptsPath = Join-Path $env:USERPROFILE .gitscripts
+
+        if (-not (Test-Path -Path $rootScriptsPath)) {
+            Write-Host "Creando el directorio $rootScriptsPath"
+            New-Item -ItemType Directory -Path $rootScriptsPath
+        }
+
         $copiedCount = 0
         foreach ($file in $scriptFiles) {
-            $destinationPath = Join-Path $userPath $file.Name
+            $destinationPath = Join-Path $rootScriptsPath $file.Name
             Copy-Item -Path $file.FullName -Destination $destinationPath -Force
             $copiedCount++
         }
         
-        Write-Host "Scripts copiados exitosamente: $copiedCount archivos a $userPath" -ForegroundColor Green
+        Write-Host "Scripts copiados exitosamente: $copiedCount archivos a $rootScriptsPath" -ForegroundColor Green
         return $true
     }
     catch {
