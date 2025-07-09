@@ -1,4 +1,5 @@
 alias:
+  rb: "!~/.gitscripts/git-rebase.sh"
   sq: "!~/.gitscripts/git-squash.sh"
   s: "!(git status -s)"
   lg: "!f() { git log --oneline $1; }; f"
