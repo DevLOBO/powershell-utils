@@ -17,6 +17,7 @@
 
     # Exportaciones
     FunctionsToExport = @(
+        'Get-CustomItems',
         'Get-RAMUsed',
         'Select-Beep',
         'Select-DirectoryWithWords',
@@ -28,6 +29,7 @@
     )
 
     AliasesToExport = @(
+        'lsz',
         'ram',
         'gtd',
         'fof',

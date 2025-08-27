@@ -1,3 +1,38 @@
+function Get-CustomItems {
+    param(
+        [string]$Path = ".",
+        [string[]]$Format = @("n")  # Por defecto solo el nombre
+    )
+
+    # Obtener los elementos del directorio
+    $items = Get-ChildItem -LiteralPath $Path
+
+    foreach ($item in $items) {
+        $output = @()
+
+        foreach ($key in $Format) {
+            switch ($key) {
+                "n" { $output += $item.Name }
+                "d" { $output += $item.LastWriteTime.ToString("yyyy-MM-dd") }
+                "z" { 
+                    if ($item.PSIsContainer) {
+                        $output += "<DIR>"
+                    } else {
+                        # Tamaño en KB con formato
+                        $sizeKB = [math]::Round($item.Length / 1KB, 2)
+                        $output += "${sizeKB}KB"
+                    }
+                }
+                "m" { $output += $item.Mode }
+                default { $output += "?" } # En caso de clave desconocida
+            }
+        }
+
+        # Imprimir la línea con los valores formateados separados por espacios
+        Write-Output ($output -join " ")
+    }
+}
+
 class ProgressBar {
     [int]$Total
     [int]$BarLength = 40
@@ -616,3 +651,4 @@ New-Alias -Name modexports -Value Get-ExportedFunctionsAndAliasesFromModule
 New-Alias -Name ftf -Value Find-TextInFiles
 New-Alias -Name and -Value Invoke-IfSuccess
 New-Alias -Value Remove-FilteredItems -Name rmr
+New-Alias -Value Get-CustomItems -Name lsz
